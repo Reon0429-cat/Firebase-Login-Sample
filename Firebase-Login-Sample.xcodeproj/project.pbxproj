@@ -11,8 +11,6 @@
 		77083B2E38397B945F694B25 /* Pods_Firebase_Login_Sample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6B85D2EED55AF466A8CEAB /* Pods_Firebase_Login_Sample.framework */; };
 		ABBD78AA2739FCC0007791EB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78A92739FCC0007791EB /* AppDelegate.swift */; };
 		ABBD78AC2739FCC0007791EB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78AB2739FCC0007791EB /* SceneDelegate.swift */; };
-		ABBD78AE2739FCC0007791EB /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78AD2739FCC0007791EB /* ViewController.swift */; };
-		ABBD78B12739FCC0007791EB /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ABBD78AF2739FCC0007791EB /* Main.storyboard */; };
 		ABBD78B32739FCC2007791EB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ABBD78B22739FCC2007791EB /* Assets.xcassets */; };
 		ABBD78B62739FCC2007791EB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ABBD78B42739FCC2007791EB /* LaunchScreen.storyboard */; };
 		ABBD78C12739FCC2007791EB /* Firebase_Login_SampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78C02739FCC2007791EB /* Firebase_Login_SampleTests.swift */; };
@@ -51,8 +49,6 @@
 		ABBD78A62739FCC0007791EB /* Firebase-Login-Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Firebase-Login-Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABBD78A92739FCC0007791EB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ABBD78AB2739FCC0007791EB /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		ABBD78AD2739FCC0007791EB /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		ABBD78B02739FCC0007791EB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		ABBD78B22739FCC2007791EB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ABBD78B52739FCC2007791EB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ABBD78B72739FCC2007791EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -141,14 +137,12 @@
 		ABBD78A82739FCC0007791EB /* Firebase-Login-Sample */ = {
 			isa = PBXGroup;
 			children = (
-				ABBD78A92739FCC0007791EB /* AppDelegate.swift */,
-				ABBD78AB2739FCC0007791EB /* SceneDelegate.swift */,
-				ABBD78AD2739FCC0007791EB /* ViewController.swift */,
-				ABBD78AF2739FCC0007791EB /* Main.storyboard */,
-				ABBD78B22739FCC2007791EB /* Assets.xcassets */,
-				ABBD78B42739FCC2007791EB /* LaunchScreen.storyboard */,
-				ABBD78B72739FCC2007791EB /* Info.plist */,
-				ABBD78D92739FE22007791EB /* GoogleService-Info.plist */,
+				ABBD78DD2739FF03007791EB /* Data */,
+				ABBD78DE2739FF08007791EB /* Domain */,
+				ABBD78DB2739FEF6007791EB /* Presentation */,
+				ABBD78E02739FF14007791EB /* Extensions */,
+				ABBD78DF2739FF0D007791EB /* Application */,
+				ABBD78DC2739FEFD007791EB /* Resources */,
 			);
 			path = "Firebase-Login-Sample";
 			sourceTree = "<group>";
@@ -168,6 +162,118 @@
 				ABBD78CC2739FCC2007791EB /* Firebase_Login_SampleUITestsLaunchTests.swift */,
 			);
 			path = "Firebase-Login-SampleUITests";
+			sourceTree = "<group>";
+		};
+		ABBD78DB2739FEF6007791EB /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				ABBD78E72739FFD9007791EB /* LaunchScreen */,
+				ABBD78E62739FFD1007791EB /* LoginAndSignUp */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		ABBD78DC2739FEFD007791EB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				ABBD78B22739FCC2007791EB /* Assets.xcassets */,
+				ABBD78B72739FCC2007791EB /* Info.plist */,
+				ABBD78D92739FE22007791EB /* GoogleService-Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		ABBD78DD2739FF03007791EB /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				ABBD78E52739FFB6007791EB /* Entities */,
+				ABBD78E42739FFB1007791EB /* DataStores */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		ABBD78DE2739FF08007791EB /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				ABBD78E22739FF99007791EB /* Repositories */,
+				ABBD78E32739FF9F007791EB /* UseCases */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		ABBD78DF2739FF0D007791EB /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				ABBD78A92739FCC0007791EB /* AppDelegate.swift */,
+				ABBD78AB2739FCC0007791EB /* SceneDelegate.swift */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
+		ABBD78E02739FF14007791EB /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		ABBD78E22739FF99007791EB /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		ABBD78E32739FF9F007791EB /* UseCases */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = UseCases;
+			sourceTree = "<group>";
+		};
+		ABBD78E42739FFB1007791EB /* DataStores */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = DataStores;
+			sourceTree = "<group>";
+		};
+		ABBD78E52739FFB6007791EB /* Entities */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Entities;
+			sourceTree = "<group>";
+		};
+		ABBD78E62739FFD1007791EB /* LoginAndSignUp */ = {
+			isa = PBXGroup;
+			children = (
+				ABBD78E9273A00C0007791EB /* Views */,
+				ABBD78E8273A00B7007791EB /* Controllers */,
+			);
+			path = LoginAndSignUp;
+			sourceTree = "<group>";
+		};
+		ABBD78E72739FFD9007791EB /* LaunchScreen */ = {
+			isa = PBXGroup;
+			children = (
+				ABBD78B42739FCC2007791EB /* LaunchScreen.storyboard */,
+			);
+			path = LaunchScreen;
+			sourceTree = "<group>";
+		};
+		ABBD78E8273A00B7007791EB /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		ABBD78E9273A00C0007791EB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -282,7 +388,6 @@
 				ABBD78B62739FCC2007791EB /* LaunchScreen.storyboard in Resources */,
 				ABBD78DA2739FE22007791EB /* GoogleService-Info.plist in Resources */,
 				ABBD78B32739FCC2007791EB /* Assets.xcassets in Resources */,
-				ABBD78B12739FCC0007791EB /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,7 +515,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ABBD78AE2739FCC0007791EB /* ViewController.swift in Sources */,
 				ABBD78AA2739FCC0007791EB /* AppDelegate.swift in Sources */,
 				ABBD78AC2739FCC0007791EB /* SceneDelegate.swift in Sources */,
 			);
@@ -449,14 +553,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		ABBD78AF2739FCC0007791EB /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				ABBD78B02739FCC0007791EB /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		ABBD78B42739FCC2007791EB /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -594,7 +690,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 242KS3V77L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Firebase-Login-Sample/Info.plist";
+				INFOPLIST_FILE = "Firebase-Login-Sample/Resources/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -623,7 +719,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 242KS3V77L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Firebase-Login-Sample/Info.plist";
+				INFOPLIST_FILE = "Firebase-Login-Sample/Resources/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
