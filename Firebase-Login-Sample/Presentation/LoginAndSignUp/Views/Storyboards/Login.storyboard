@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Login View Controller-->
+        <scene sceneID="s0d-6b-0kx">
+            <objects>
+                <viewController storyboardIdentifier="LoginViewController" id="Y6W-OH-hqX" customClass="LoginViewController" customModule="StudyRecordApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5EZ-qb-Rvc">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="40" translatesAutoresizingMaskIntoConstraints="NO" id="SzB-s5-H1W">
+                                <rect key="frame" x="50" y="174" width="314" height="160"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="qaQ-z5-lPq">
+                                        <rect key="frame" x="0.0" y="0.0" width="314" height="60"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="メールアドレス" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YJL-yu-W81">
+                                                <rect key="frame" x="0.0" y="0.0" width="314" height="30"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="30" id="O8j-gg-h58"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="S80-2s-Ve2" customClass="CustomTextField" customModule="StudyRecordApp" customModuleProvider="target">
+                                                <rect key="frame" x="0.0" y="30" width="314" height="30"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                                <textInputTraits key="textInputTraits"/>
+                                            </textField>
+                                        </subviews>
+                                    </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="kTP-8S-xwL">
+                                        <rect key="frame" x="0.0" y="100" width="314" height="60"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="パスワード" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="euz-71-knd">
+                                                <rect key="frame" x="0.0" y="0.0" width="314" height="30"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Fy8-UG-gHq" customClass="CustomTextField" customModule="StudyRecordApp" customModuleProvider="target">
+                                                <rect key="frame" x="0.0" y="30" width="314" height="30"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                                <textInputTraits key="textInputTraits"/>
+                                            </textField>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="euz-71-knd" firstAttribute="height" secondItem="YJL-yu-W81" secondAttribute="height" id="plI-U4-OBh"/>
+                                </constraints>
+                            </stackView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="E1T-9B-WQm">
+                                <rect key="frame" x="20" y="209.5" width="25" height="18.5"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="E1T-9B-WQm" secondAttribute="height" id="hnI-Mf-qOi"/>
+                                </constraints>
+                                <imageReference key="image" image="envelope" catalog="system" renderingMode="original"/>
+                                <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="small"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="oit-PF-ZG4">
+                                <rect key="frame" x="20" y="309" width="25" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="oit-PF-ZG4" secondAttribute="height" id="DvA-AR-077"/>
+                                </constraints>
+                                <imageReference key="image" image="lock" catalog="system" renderingMode="original"/>
+                                <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="small"/>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gbF-C3-DJA">
+                                <rect key="frame" x="369" y="301.5" width="35" height="35"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="gbF-C3-DJA" secondAttribute="height" multiplier="1:1" id="YvO-I1-HXq"/>
+                                </constraints>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" image="eye.fill" catalog="system">
+                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
+                                </state>
+                                <connections>
+                                    <action selector="passwordSecureButtonDidTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="Rir-J5-3dw"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jTw-3S-5KP" customClass="CustomButton" customModule="StudyRecordApp" customModuleProvider="target">
+                                <rect key="frame" x="100" y="404" width="214" height="60"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="kKa-8b-3aA"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="ログイン"/>
+                                <connections>
+                                    <action selector="loginButtonDidTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="wn1-fO-Mfp"/>
+                                </connections>
+                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gor-eW-KDk">
+                                <rect key="frame" x="130" y="802" width="264" height="30"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="パスワードをお忘れの方は" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sTT-7f-ND3">
+                                        <rect key="frame" x="0.0" y="0.0" width="208" height="30"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EYA-AQ-VMN" customClass="CustomButton" customModule="StudyRecordApp" customModuleProvider="target">
+                                        <rect key="frame" x="208" y="0.0" width="56" height="30"/>
+                                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <state key="normal" title="こちら"/>
+                                        <connections>
+                                            <action selector="passwordForgotButtonDidTapped:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="9bI-kC-1r9"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="hvg-Lq-o5g"/>
+                                </constraints>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="SzB-s5-H1W" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="3MZ-eL-sgm"/>
+                            <constraint firstItem="gbF-C3-DJA" firstAttribute="leading" secondItem="SzB-s5-H1W" secondAttribute="trailing" constant="5" id="6NR-f7-OQ5"/>
+                            <constraint firstItem="gor-eW-KDk" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="20" id="9f1-oU-PLt"/>
+                            <constraint firstItem="oit-PF-ZG4" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="20" id="Cp8-v2-RQG"/>
+                            <constraint firstItem="SzB-s5-H1W" firstAttribute="leading" secondItem="E1T-9B-WQm" secondAttribute="trailing" constant="5" id="QKp-rC-G8E"/>
+                            <constraint firstItem="gbF-C3-DJA" firstAttribute="centerY" secondItem="Fy8-UG-gHq" secondAttribute="centerY" id="Qt2-8e-avR"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="gor-eW-KDk" secondAttribute="trailing" constant="20" id="X2z-og-4Ys"/>
+                            <constraint firstItem="oit-PF-ZG4" firstAttribute="centerY" secondItem="Fy8-UG-gHq" secondAttribute="centerY" id="YyH-85-4ln"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="SzB-s5-H1W" secondAttribute="trailing" constant="50" id="dzj-mg-DFS"/>
+                            <constraint firstItem="E1T-9B-WQm" firstAttribute="centerY" secondItem="S80-2s-Ve2" secondAttribute="centerY" id="fns-zA-iVs"/>
+                            <constraint firstItem="SzB-s5-H1W" firstAttribute="leading" secondItem="oit-PF-ZG4" secondAttribute="trailing" constant="5" id="ims-cf-1Me"/>
+                            <constraint firstItem="E1T-9B-WQm" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="20" id="mOs-hV-VTh"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="gbF-C3-DJA" secondAttribute="trailing" constant="10" id="mn8-wH-y9h"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="bottom" secondItem="gor-eW-KDk" secondAttribute="bottom" constant="30" id="mv1-vu-AyV"/>
+                            <constraint firstItem="jTw-3S-5KP" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="orP-lp-K5b"/>
+                            <constraint firstItem="SzB-s5-H1W" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" constant="130" id="qf3-rk-Gj4"/>
+                            <constraint firstItem="jTw-3S-5KP" firstAttribute="top" secondItem="SzB-s5-H1W" secondAttribute="bottom" constant="70" id="zHh-ld-m8N"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="jTw-3S-5KP" secondAttribute="trailing" constant="100" id="zpo-WM-r2E"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="loginButton" destination="jTw-3S-5KP" id="GKu-Ia-MIl"/>
+                        <outlet property="mailAddressImage" destination="E1T-9B-WQm" id="TeJ-IJ-pP2"/>
+                        <outlet property="mailAddressLabel" destination="YJL-yu-W81" id="zvt-Sh-Oac"/>
+                        <outlet property="mailAddressTextField" destination="S80-2s-Ve2" id="ZiO-Q9-7s6"/>
+                        <outlet property="passwordForgotButton" destination="EYA-AQ-VMN" id="uvd-KU-NoC"/>
+                        <outlet property="passwordForgotLabel" destination="sTT-7f-ND3" id="vpT-fl-ubT"/>
+                        <outlet property="passwordImage" destination="oit-PF-ZG4" id="NO2-Ln-BC0"/>
+                        <outlet property="passwordLabel" destination="euz-71-knd" id="IaL-f6-Oqa"/>
+                        <outlet property="passwordSecureButton" destination="gbF-C3-DJA" id="cpY-l1-t77"/>
+                        <outlet property="passwordTextField" destination="Fy8-UG-gHq" id="xY8-An-dZN"/>
+                        <outlet property="stackViewTopConstraint" destination="qf3-rk-Gj4" id="UiM-Kn-zth"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="137.68115942028987" y="101.78571428571428"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="envelope" catalog="system" width="128" height="93"/>
+        <image name="eye.fill" catalog="system" width="128" height="78"/>
+        <image name="lock" catalog="system" width="128" height="128"/>
+    </resources>
+</document>
