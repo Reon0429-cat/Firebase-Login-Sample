@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 protocol LoginVCDelegate: AnyObject {
     func leftSwipeDid()
@@ -26,14 +28,8 @@ final class LoginViewController: UIViewController {
     @IBOutlet private weak var passwordForgotLabel: UILabel!
     
     weak var delegate: LoginVCDelegate?
-    private var isPasswordHidden = true
-    private var isKeyboardHidden = true
-    private let userUseCase = UserUseCase(
-        repository: UserRepository(
-            dataStore: FirebaseUserDataStore()
-        )
-    )
-    private let indicator = Indicator(kinds: PKHUDIndicator())
+    private let viewModel: LoginViewModelType = LoginViewModel()
+    private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,6 +48,8 @@ final class LoginViewController: UIViewController {
         setupKeyboardObserver()
         self.view.backgroundColor = .dynamicColor(light: .white,
                                                   dark: .secondarySystemBackground)
+        setupBindings()
+        viewModel.inputs.viewDidLoad()
         
     }
     
@@ -60,57 +58,61 @@ final class LoginViewController: UIViewController {
         self.view.endEditing(true)
     }
     
-}
-
-// MARK: - IBAction func
-private extension LoginViewController {
-    
-    @IBAction func passwordSecureButtonDidTapped(_ sender: Any) {
-        changePasswordSecureButtonImage(isSlash: isPasswordHidden)
-        passwordTextField.isSecureTextEntry.toggle()
-        isPasswordHidden.toggle()
-    }
-    
-    @IBAction func loginButtonDidTapped(_ sender: Any) {
-        guard let email = mailAddressTextField.text,
-              let password = passwordTextField.text else { return }
-        if CommunicationStatus().unstable() {
-            showErrorAlert(title: "通信環境が良くありません")
-            return
-        }
-        indicator.show(.progress)
-        userUseCase.login(email: email,
-                          password: password) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let title):
-                    self.indicator.flash(.error) {
-                        self.showErrorAlert(title: title)
-                    }
-                case .success:
-                    self.indicator.flash(.success) {
+    private func setupBindings() {
+        // MARK: - Input
+        passwordSecureButton.rx.tap
+            .subscribe(onNext: {
+                self.viewModel.inputs.passwordSecureButtonDidTapped(
+                    shouldPasswordTextFieldSecure: self.passwordTextField.isSecureTextEntry
+                )
+            })
+            .disposed(by: disposeBag)
+        
+        loginButton.rx.tap
+            .subscribe(onNext: {
+                self.viewModel.inputs.loginButtonDidTapped(
+                    email: self.mailAddressTextField.text,
+                    password: self.passwordTextField.text
+                )
+            })
+            .disposed(by: disposeBag)
+        
+        passwordForgotButton.rx.tap
+            .subscribe(onNext: viewModel.inputs.passwordForgotButtonDidTapped)
+            .disposed(by: disposeBag)
+        
+        // MARK: - Output
+        viewModel.outputs.passwordSecureButtonImage
+            .drive(onNext: { self.passwordSecureButton.setImage($0, for: .normal) })
+            .disposed(by: disposeBag)
+        
+        viewModel.outputs.event
+            .drive(onNext: { event in
+                switch event {
+                    case .dismiss:
                         self.dismiss(animated: true)
-                    }
-            }
-        }
-    }
-    
-    @IBAction func passwordForgotButtonDidTapped(_ sender: Any) {
-        guard let resetingPasswordVC = UIStoryboard(name: "ResetingPassword", bundle: nil)
-                .instantiateInitialViewController() else { return }
-        present(resetingPasswordVC, animated: true)
-    }
-    
-}
-
-// MARK: - func
-private extension LoginViewController {
-    
-    func changePasswordSecureButtonImage(isSlash: Bool) {
-        let eyeFillImage = UIImage(systemName: .eyeFill)
-        let eyeSlashFillImage = UIImage(systemName: .eyeSlashFill)
-        let image = isSlash ? eyeSlashFillImage : eyeFillImage
-        passwordSecureButton.setImage(image, for: .normal)
+                    case .showErrorAlert(let title):
+                        self.showErrorAlert(title: title)
+                    case .presentResetingPassword:
+                        guard let resetingPasswordVC = UIStoryboard(name: "ResetingPassword", bundle: nil)
+                                .instantiateInitialViewController() else { return }
+                        self.present(resetingPasswordVC, animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.outputs.shouldPasswordTextFieldSecure
+            .drive(passwordTextField.rx.isSecureTextEntry)
+            .disposed(by: disposeBag)
+        
+        viewModel.outputs.stackViewTopConstant
+            .drive(onNext: { constant in
+                UIView.animate(deadlineFromNow: 0, duration: 0.5) {
+                    self.stackViewTopConstraint.constant += constant
+                    self.view.layoutIfNeeded()
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
 }
@@ -164,7 +166,6 @@ private extension LoginViewController {
     
     func setupPasswordTextField() {
         passwordTextField.delegate = self
-        passwordTextField.isSecureTextEntry = true
         passwordTextField.textContentType = .newPassword
     }
     
@@ -179,7 +180,6 @@ private extension LoginViewController {
     }
     
     func setupPasswordSecureButton() {
-        changePasswordSecureButtonImage(isSlash: false)
         passwordSecureButton.tintColor = .dynamicColor(light: .black, dark: .white)
     }
     
@@ -210,24 +210,12 @@ private extension LoginViewController {
     
     @objc
     func keyboardWillShow() {
-        if isKeyboardHidden {
-            UIView.animate(deadlineFromNow: 0, duration: 0.5) {
-                self.stackViewTopConstraint.constant -= 100
-                self.view.layoutIfNeeded()
-            }
-        }
-        isKeyboardHidden = false
+        viewModel.inputs.keyboardWillShow()
     }
     
     @objc
     func keyboardWillHide() {
-        if !isKeyboardHidden {
-            UIView.animate(deadlineFromNow: 0, duration: 0.5) {
-                self.stackViewTopConstraint.constant += 100
-                self.view.layoutIfNeeded()
-            }
-        }
-        isKeyboardHidden = true
+        viewModel.inputs.keyboardWillHide()
     }
     
 }
