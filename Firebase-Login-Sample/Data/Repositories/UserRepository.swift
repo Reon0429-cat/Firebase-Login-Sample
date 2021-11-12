@@ -6,23 +6,7 @@
 //
 
 import Foundation
-
-protocol UserRepositoryProtocol {
-    var currentUser: User? { get }
-    func registerUser(email: String,
-                      password: String,
-                      completion: @escaping ResultHandler<User>)
-    func createUser(userId: String,
-                    email: String,
-                    completion: @escaping ResultHandler<Any?>)
-    func login(email: String,
-               password: String,
-               completion: @escaping ResultHandler<Any?>)
-    func logout(completion: @escaping ResultHandler<Any?>)
-    func sendPasswordResetMail(email: String,
-                               completion: @escaping ResultHandler<Any?>)
-    func signInAnonymously(completion: @escaping ResultHandler<Any?>)
-}
+import RxSwift
 
 final class UserRepository: UserRepositoryProtocol {
     
@@ -51,12 +35,19 @@ final class UserRepository: UserRepositoryProtocol {
                              completion: completion)
     }
     
-    func login(email: String,
-               password: String,
-               completion: @escaping ResultHandler<Any?>) {
-        dataStore.login(email: email,
-                        password: password,
-                        completion: completion)
+    func login(email: String, password: String) -> Completable {
+        Completable.create { observer in
+            self.dataStore.login(email: email,
+                                 password: password) { result in
+                switch result {
+                    case .failure(let error):
+                        observer(.error(error))
+                    case .success:
+                        observer(.completed)
+                }
+            }
+            return Disposables.create()
+        }
     }
     
     func logout(completion: @escaping ResultHandler<Any?>) {

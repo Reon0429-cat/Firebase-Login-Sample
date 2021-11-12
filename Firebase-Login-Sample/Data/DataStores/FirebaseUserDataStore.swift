@@ -27,7 +27,7 @@ protocol UserDataStoreProtocol {
                     completion: @escaping ResultHandler<Any?>)
     func login(email: String,
                password: String,
-               completion: @escaping ResultHandler<Any?>)
+               completion: @escaping (Result<Any?, Error>) -> Void)
     func logout(completion: @escaping ResultHandler<Any?>)
     func sendPasswordResetMail(email: String,
                                completion: @escaping ResultHandler<Any?>)
@@ -75,12 +75,11 @@ final class FirebaseUserDataStore: UserDataStoreProtocol {
     
     func login(email: String,
                password: String,
-               completion: @escaping ResultHandler<Any?>) {
+               completion: @escaping (Result<Any?, Error>) -> Void) {
         Auth.auth().signIn(withEmail: email,
                            password: password) { _, error in
             if let error = error {
-                let message = self.authErrorMessage(error)
-                completion(.failure(message))
+                completion(.failure(error))
                 return
             }
             completion(.success(nil))
@@ -123,6 +122,32 @@ final class FirebaseUserDataStore: UserDataStoreProtocol {
     
     private func authErrorMessage(_ error: Error) -> String {
         if let errorCode = AuthErrorCode(rawValue: error._code) {
+            switch errorCode {
+                case .invalidEmail:
+                    return "メールアドレスの形式に誤りが含まれます。"
+                case .weakPassword:
+                    return "パスワードは６文字以上で入力してください。"
+                case .wrongPassword:
+                    return "パスワードに誤りがあります。"
+                case .userNotFound:
+                    return "こちらのメールアドレスは登録されていません。"
+                case .emailAlreadyInUse:
+                    return "こちらのメールアドレスは既に登録されています。"
+                case .adminRestrictedOperation:
+                    return "匿名ログインに失敗しました。"
+                default:
+                    break
+            }
+        }
+        return "不明なエラーが発生しました。"
+    }
+    
+}
+
+extension Error {
+    
+    var toAuthErrorMessage: String {
+        if let errorCode = AuthErrorCode(rawValue: self._code) {
             switch errorCode {
                 case .invalidEmail:
                     return "メールアドレスの形式に誤りが含まれます。"

@@ -28,7 +28,14 @@ final class LoginViewController: UIViewController {
     @IBOutlet private weak var passwordForgotLabel: UILabel!
     
     weak var delegate: LoginVCDelegate?
-    private let viewModel: LoginViewModelType = LoginViewModel()
+    private lazy var viewModel: LoginViewModelType = LoginViewModel(
+        mailText: mailAddressTextField.rx.text.orEmpty.asDriver(),
+        passwordText: passwordTextField.rx.text.orEmpty.asDriver(),
+        loginButton: loginButton.rx.tap.asSignal(),
+        passwordSecureButton: passwordSecureButton.rx.tap.asSignal(),
+        passwordForgotButton: passwordForgotButton.rx.tap.asSignal()
+    )
+    
     private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
@@ -59,29 +66,6 @@ final class LoginViewController: UIViewController {
     }
     
     private func setupBindings() {
-        // MARK: - Input
-        passwordSecureButton.rx.tap
-            .subscribe(onNext: {
-                self.viewModel.inputs.passwordSecureButtonDidTapped(
-                    shouldPasswordTextFieldSecure: self.passwordTextField.isSecureTextEntry
-                )
-            })
-            .disposed(by: disposeBag)
-        
-        loginButton.rx.tap
-            .subscribe(onNext: {
-                self.viewModel.inputs.loginButtonDidTapped(
-                    email: self.mailAddressTextField.text,
-                    password: self.passwordTextField.text
-                )
-            })
-            .disposed(by: disposeBag)
-        
-        passwordForgotButton.rx.tap
-            .subscribe(onNext: viewModel.inputs.passwordForgotButtonDidTapped)
-            .disposed(by: disposeBag)
-        
-        // MARK: - Output
         viewModel.outputs.passwordSecureButtonImage
             .drive(onNext: { self.passwordSecureButton.setImage($0, for: .normal) })
             .disposed(by: disposeBag)
@@ -112,6 +96,10 @@ final class LoginViewController: UIViewController {
                     self.view.layoutIfNeeded()
                 }
             })
+            .disposed(by: disposeBag)
+        
+        viewModel.outputs.isLoginButtonEnabled
+            .drive(onNext: { self.loginButton.changeState(isEnabled: $0) })
             .disposed(by: disposeBag)
     }
     
@@ -176,7 +164,6 @@ private extension LoginViewController {
     
     func setupLoginButton() {
         loginButton.setTitle("ログイン", for: .normal)
-        loginButton.changeState(isEnabled: false)
     }
     
     func setupPasswordSecureButton() {

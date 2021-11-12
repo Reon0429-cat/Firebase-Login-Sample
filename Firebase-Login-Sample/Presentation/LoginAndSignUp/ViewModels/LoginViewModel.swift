@@ -11,17 +11,15 @@ import RxCocoa
 
 protocol LoginViewModelInput {
     func viewDidLoad()
-    func passwordSecureButtonDidTapped(shouldPasswordTextFieldSecure: Bool)
-    func loginButtonDidTapped(email: String?, password: String?)
-    func passwordForgotButtonDidTapped()
     func keyboardWillShow()
     func keyboardWillHide()
 }
 
 protocol LoginViewModelOutput: AnyObject {
-    var passwordSecureButtonImage: Driver<UIImage> { get }
     var shouldPasswordTextFieldSecure: Driver<Bool> { get }
     var stackViewTopConstant: Driver<CGFloat> { get }
+    var isLoginButtonEnabled: Driver<Bool> { get }
+    var passwordSecureButtonImage: Driver<UIImage> { get }
     var event: Driver<LoginViewModel.Event> { get }
 }
 
@@ -40,11 +38,13 @@ final class LoginViewModel {
             dataStore: FirebaseUserDataStore()
         )
     )
-    private let passwordSecureButtonImageNameRelay = PublishRelay<UIImage>()
+    private let isEyeFillImageRelay = PublishRelay<Bool>()
     private let passwordForgotButtonRelay = PublishRelay<Void>()
     private let shouldPasswordTextFieldSecureRelay = BehaviorRelay<Bool>(value: true)
     private let stackViewTopConstantRelay = PublishRelay<CGFloat>()
     private let eventRelay = PublishRelay<Event>()
+    private let isLoginButtonEnabledRelay = BehaviorRelay<Bool>(value: false)
+    private let disposeBag = DisposeBag()
     
     enum Event {
         case dismiss
@@ -52,11 +52,65 @@ final class LoginViewModel {
         case showErrorAlert(title: String)
     }
     
-    private func changePasswordSecureButtonImage(isSlash: Bool) {
-        let eyeFillImage = UIImage(systemName: .eyeFill)
-        let eyeSlashFillImage = UIImage(systemName: .eyeSlashFill)
-        let image = isSlash ? eyeSlashFillImage : eyeFillImage
-        passwordSecureButtonImageNameRelay.accept(image)
+    init(mailText: Driver<String>,
+         passwordText: Driver<String>,
+         loginButton: Signal<Void>,
+         passwordSecureButton: Signal<Void>,
+         passwordForgotButton: Signal<Void>) {
+        // Input from VC
+        Observable
+            .combineLatest(
+                mailText.asObservable(),
+                passwordText.asObservable()
+            )
+            .map { !$0.isEmpty && !$1.isEmpty }
+            .bind(to: isLoginButtonEnabledRelay)
+            .disposed(by: disposeBag)
+        
+        loginButton.asObservable()
+            .withLatestFrom(
+                Observable.combineLatest(
+                    mailText.asObservable(),
+                    passwordText.asObservable()
+                )
+            )
+            .subscribe(onNext: {
+                self.indicator.show(.progress)
+                self.userUseCase.login(email: $0, password: $1)
+            })
+            .disposed(by: disposeBag)
+        
+        passwordSecureButton.asObservable()
+            .subscribe(onNext: {
+                self.isEyeFillImageRelay.accept(self.isPasswordHidden)
+                self.shouldPasswordTextFieldSecureRelay.accept(!self.shouldPasswordTextFieldSecureRelay.value)
+                self.isPasswordHidden.toggle()
+            })
+            .disposed(by: disposeBag)
+        
+        passwordForgotButton.asObservable()
+            .subscribe(onNext: {
+                self.eventRelay.accept(.presentResetingPassword)
+            })
+            .disposed(by: disposeBag)
+        
+        
+        // Output from UserUserCase
+        userUseCase.loginSuccessful
+            .subscribe(onNext: {
+                self.indicator.flash(.success) {
+                    self.eventRelay.accept(.dismiss)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        userUseCase.loginError
+            .subscribe(onNext: { error in
+                self.indicator.flash(.error) {
+                    self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
 }
@@ -65,42 +119,8 @@ final class LoginViewModel {
 extension LoginViewModel: LoginViewModelInput {
     
     func viewDidLoad() {
-        changePasswordSecureButtonImage(isSlash: false)
+        isEyeFillImageRelay.accept(false)
         shouldPasswordTextFieldSecureRelay.accept(true)
-    }
-    
-    func passwordSecureButtonDidTapped(shouldPasswordTextFieldSecure: Bool) {
-        changePasswordSecureButtonImage(isSlash: isPasswordHidden)
-        shouldPasswordTextFieldSecureRelay.accept(!shouldPasswordTextFieldSecure)
-        isPasswordHidden.toggle()
-    }
-    
-    func loginButtonDidTapped(email: String?, password: String?) {
-        guard let email = email,
-              let password = password else { return }
-        if CommunicationStatus().unstable() {
-            eventRelay.accept(.showErrorAlert(title: "通信環境が良くありません"))
-            return
-        }
-        indicator.show(.progress)
-        userUseCase.login(email: email,
-                          password: password) { [weak self] result in
-            guard let strongSelf = self else { return }
-            switch result {
-                case .failure(let title):
-                    strongSelf.indicator.flash(.error) {
-                        strongSelf.eventRelay.accept(.showErrorAlert(title: title))
-                    }
-                case .success:
-                    strongSelf.indicator.flash(.success) {
-                        strongSelf.eventRelay.accept(.dismiss)
-                    }
-            }
-        }
-    }
-    
-    func passwordForgotButtonDidTapped() {
-        eventRelay.accept(.presentResetingPassword)
     }
     
     func keyboardWillShow() {
@@ -122,10 +142,6 @@ extension LoginViewModel: LoginViewModelInput {
 // MARK: - Output
 extension LoginViewModel: LoginViewModelOutput {
     
-    var passwordSecureButtonImage: Driver<UIImage> {
-        passwordSecureButtonImageNameRelay.asDriver(onErrorDriveWith: .empty())
-    }
-    
     var shouldPasswordTextFieldSecure: Driver<Bool> {
         shouldPasswordTextFieldSecureRelay.asDriver(onErrorDriveWith: .empty())
     }
@@ -134,8 +150,23 @@ extension LoginViewModel: LoginViewModelOutput {
         stackViewTopConstantRelay.asDriver(onErrorDriveWith: .empty())
     }
     
+    var passwordSecureButtonImage: Driver<UIImage> {
+        isEyeFillImageRelay
+            .map { isSlash in
+                if isSlash {
+                    return UIImage(systemName: .eyeSlashFill)
+                }
+                return UIImage(systemName: .eyeFill)
+            }
+            .asDriver(onErrorDriveWith: .empty())
+    }
+    
     var event: Driver<Event> {
         eventRelay.asDriver(onErrorDriveWith: .empty())
+    }
+    
+    var isLoginButtonEnabled: Driver<Bool> {
+        isLoginButtonEnabledRelay.asDriver()
     }
     
 }

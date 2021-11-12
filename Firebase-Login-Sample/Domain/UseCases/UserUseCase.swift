@@ -6,12 +6,45 @@
 //
 
 import UIKit
+import RxSwift
+import RxRelay
 
 final class UserUseCase {
     
     private var repository: UserRepositoryProtocol
+    private let loginTrigger = PublishRelay<(String, String)>()
+    private let loginSuccessfulRelay = PublishRelay<Void>()
+    private let loginErrorRelay = PublishRelay<Error>()
+    private let disposeBag = DisposeBag()
+    
     init(repository: UserRepositoryProtocol) {
         self.repository = repository
+        setupBindings()
+    }
+    
+    var loginSuccessful: Observable<Void> {
+        loginSuccessfulRelay.asObservable()
+    }
+    
+    var loginError: Observable<Error> {
+        loginErrorRelay.asObservable()
+    }
+    
+    private func setupBindings() {
+        loginTrigger
+            .subscribe(onNext: { emailText, passwordText in
+                self.repository.login(email: emailText, password: passwordText)
+                    .subscribe(
+                        onCompleted: {
+                            self.loginSuccessfulRelay.accept(())
+                        },
+                        onError: { error in
+                            self.loginErrorRelay.accept(error)
+                        }
+                    )
+                    .disposed(by: self.disposeBag)
+            })
+            .disposed(by: disposeBag)
     }
     
     var isLoggedIn: Bool {
@@ -41,12 +74,8 @@ final class UserUseCase {
                               completion: completion)
     }
     
-    func login(email: String,
-               password: String,
-               completion: @escaping ResultHandler<Any?>) {
-        repository.login(email: email,
-                         password: password,
-                         completion: completion)
+    func login(email: String, password: String) {
+        loginTrigger.accept((email, password))
     }
     
     func logout(completion: @escaping ResultHandler<Any?>) {
