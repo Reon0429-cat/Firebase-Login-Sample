@@ -33,6 +33,11 @@ final class LoginViewModel {
     private var isPasswordHidden = true
     private var isKeyboardHidden = true
     private let indicator = Indicator(kinds: PKHUDIndicator())
+    private let userUseCase = UserUseCase(
+        repository: UserRepository(
+            dataStore: FirebaseUserDataStore()
+        )
+    )
     private let isEyeFillImageRelay = PublishRelay<Bool>()
     private let passwordForgotButtonRelay = PublishRelay<Void>()
     private let shouldPasswordTextFieldSecureRelay = BehaviorRelay<Bool>(value: true)
@@ -47,13 +52,12 @@ final class LoginViewModel {
         case showErrorAlert(title: String)
     }
     
-    init(userUseCase: UserUseCase,
-         mailText: Driver<String>,
+    init(mailText: Driver<String>,
          passwordText: Driver<String>,
          loginButton: Signal<Void>,
          passwordSecureButton: Signal<Void>,
          passwordForgotButton: Signal<Void>) {
-        
+        // Input from VC
         Observable
             .combineLatest(
                 mailText.asObservable(),
@@ -70,27 +74,14 @@ final class LoginViewModel {
                     passwordText.asObservable()
                 )
             )
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+            .subscribe(onNext: {
                 self.indicator.show(.progress)
-                userUseCase.login(email: $0, password: $1)
-                    .subscribe(
-                        onCompleted: {
-                            self.indicator.flash(.success) {
-                                self.eventRelay.accept(.dismiss)
-                            }
-                        }, onError: { error in
-                            self.indicator.flash(.error) {
-                                self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
-                            }
-                        }
-                    ).disposed(by: self.disposeBag)
+                self.userUseCase.login(email: $0, password: $1)
             })
             .disposed(by: disposeBag)
         
         passwordSecureButton.asObservable()
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+            .subscribe(onNext: {
                 self.isEyeFillImageRelay.accept(self.isPasswordHidden)
                 self.shouldPasswordTextFieldSecureRelay.accept(!self.shouldPasswordTextFieldSecureRelay.value)
                 self.isPasswordHidden.toggle()
@@ -98,9 +89,26 @@ final class LoginViewModel {
             .disposed(by: disposeBag)
         
         passwordForgotButton.asObservable()
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+            .subscribe(onNext: {
                 self.eventRelay.accept(.presentResetingPassword)
+            })
+            .disposed(by: disposeBag)
+        
+        
+        // Output from UserUserCase
+        userUseCase.loginSuccessful
+            .subscribe(onNext: {
+                self.indicator.flash(.success) {
+                    self.eventRelay.accept(.dismiss)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        userUseCase.loginError
+            .subscribe(onNext: { error in
+                self.indicator.flash(.error) {
+                    self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
+                }
             })
             .disposed(by: disposeBag)
     }

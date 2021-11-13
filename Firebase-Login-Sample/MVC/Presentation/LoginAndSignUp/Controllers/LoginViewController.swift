@@ -29,24 +29,32 @@ final class LoginViewController: UIViewController {
     
     weak var delegate: LoginVCDelegate?
     private lazy var viewModel: LoginViewModelType = LoginViewModel(
-        userUseCase: userUseCase,
         mailText: mailAddressTextField.rx.text.orEmpty.asDriver(),
         passwordText: passwordTextField.rx.text.orEmpty.asDriver(),
         loginButton: loginButton.rx.tap.asSignal(),
         passwordSecureButton: passwordSecureButton.rx.tap.asSignal(),
         passwordForgotButton: passwordForgotButton.rx.tap.asSignal()
     )
-    private let userUseCase = UserUseCase(
-        repository: UserRepository(
-            dataStore: FirebaseUserDataStore()
-        )
-    )
+    
     private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupUI()
+        setupGR()
+        setupMailAddressTextField()
+        setupPasswordTextField()
+        setupLoginButton()
+        setupPasswordSecureButton()
+        setupMailAddressImage()
+        setupPasswordImage()
+        setupPasswordLabel()
+        setupMailAddressLabel()
+        setupPasswordForgotLabel()
+        setupPasswordForgotButton()
+        setupKeyboardObserver()
+        self.view.backgroundColor = .dynamicColor(light: .white,
+                                                  dark: .secondarySystemBackground)
         setupBindings()
         viewModel.inputs.viewDidLoad()
         
@@ -105,27 +113,17 @@ extension LoginViewController: UITextFieldDelegate {
         return true
     }
     
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        guard let mailAddressText = mailAddressTextField.text,
+              let passwordText = passwordTextField.text else { return }
+        let isEnabled = !mailAddressText.isEmpty && !passwordText.isEmpty
+        loginButton.changeState(isEnabled: isEnabled)
+    }
+    
 }
 
 // MARK: - setup
 private extension LoginViewController {
-    
-    func setupUI() {
-        setupGR()
-        setupMailAddressTextField()
-        setupPasswordTextField()
-        setupLoginButton()
-        setupPasswordSecureButton()
-        setupMailAddressImage()
-        setupPasswordImage()
-        setupPasswordLabel()
-        setupMailAddressLabel()
-        setupPasswordForgotLabel()
-        setupPasswordForgotButton()
-        setupKeyboardObserver()
-        self.view.backgroundColor = .dynamicColor(light: .white,
-                                                  dark: .secondarySystemBackground)
-    }
     
     func setupGR() {
         let leftSwipeGR = UISwipeGestureRecognizer(target: self,
