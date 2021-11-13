@@ -63,7 +63,8 @@ final class LoginViewController: UIViewController {
             .disposed(by: disposeBag)
         
         viewModel.outputs.event
-            .drive(onNext: { event in
+            .drive(onNext: { [weak self] event in
+                guard let self = self else { return }
                 switch event {
                     case .dismiss:
                         self.dismiss(animated: true)
@@ -92,6 +93,18 @@ final class LoginViewController: UIViewController {
         
         viewModel.outputs.isLoginButtonEnabled
             .drive(onNext: { self.loginButton.changeState(isEnabled: $0) })
+            .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
+            .subscribe(onNext: { [weak self] _ in
+                self?.viewModel.inputs.keyboardWillShow()
+            })
+            .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
+            .subscribe(onNext: { [weak self] _ in
+                self?.viewModel.inputs.keyboardWillHide()
+            })
             .disposed(by: disposeBag)
     }
     
@@ -122,7 +135,6 @@ private extension LoginViewController {
         setupMailAddressLabel()
         setupPasswordForgotLabel()
         setupPasswordForgotButton()
-        setupKeyboardObserver()
         self.view.backgroundColor = .dynamicColor(light: .white,
                                                   dark: .secondarySystemBackground)
     }
@@ -184,27 +196,6 @@ private extension LoginViewController {
     func setupPasswordImage() {
         let lockImage = UIImage(systemName: .lock)
         passwordImage.image = lockImage.setColor(.dynamicColor(light: .black, dark: .white))
-    }
-    
-    func setupKeyboardObserver() {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(keyboardWillShow),
-                                               name: UIResponder.keyboardWillShowNotification,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(keyboardWillHide),
-                                               name: UIResponder.keyboardWillHideNotification,
-                                               object: nil)
-    }
-    
-    @objc
-    func keyboardWillShow() {
-        viewModel.inputs.keyboardWillShow()
-    }
-    
-    @objc
-    func keyboardWillHide() {
-        viewModel.inputs.keyboardWillHide()
     }
     
 }
