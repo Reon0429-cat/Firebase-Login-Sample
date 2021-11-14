@@ -10,9 +10,7 @@ import UIKit
 final class TopViewController: UIViewController {
     
     private let userUseCase = UserUseCase(
-        repository: UserRepository(
-            dataStore: FirebaseUserDataStore()
-        )
+        repository: UserRepository()
     )
     
     override func viewDidLoad() {
@@ -23,9 +21,9 @@ final class TopViewController: UIViewController {
     @IBAction private func logoutButtonDidTapped(_ sender: Any) {
         userUseCase.logout { result in
             switch result {
-                case .failure(let title):
+                case .failure(let error):
                     DispatchQueue.main.async {
-                        self.showErrorAlert(title: title)
+                        self.showErrorAlert(title: error.toAuthErrorMessage)
                     }
                 case .success:
                     DispatchQueue.main.async {

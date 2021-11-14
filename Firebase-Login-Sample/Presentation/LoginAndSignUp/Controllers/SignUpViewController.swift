@@ -34,9 +34,7 @@ final class SignUpViewController: UIViewController {
     private var isPasswordConfirmationHidden = true
     private var isKeyboardHidden = true
     private let userUseCase = UserUseCase(
-        repository: UserRepository(
-            dataStore: FirebaseUserDataStore()
-        )
+        repository: UserRepository()
     )
     private let indicator = Indicator(kinds: PKHUDIndicator())
     
@@ -110,9 +108,9 @@ private extension SignUpViewController {
         userUseCase.signInAnonymously { [weak self] result in
             guard let self = self else { return }
             switch result {
-                case .failure(let message):
+                case .failure(let error):
                     self.indicator.flash(.error) {
-                        self.showErrorAlert(title: message)
+                        self.showErrorAlert(title: error.toAuthErrorMessage)
                     }
                 case .success:
                     self.indicator.flash(.success) {
@@ -132,9 +130,9 @@ private extension SignUpViewController {
                                  password: password) { [weak self] result in
             guard let self = self else { return }
             switch result {
-                case .failure(let title):
+                case .failure(let error):
                     self.indicator.flash(.error) {
-                        self.showErrorAlert(title: title)
+                        self.showErrorAlert(title: error.toAuthErrorMessage)
                     }
                 case .success(let user):
                     self.createUser(userId: user.id, mailAddressText: email)
@@ -147,9 +145,9 @@ private extension SignUpViewController {
                                email: mailAddressText) { [weak self] result in
             guard let self = self else { return }
             switch result {
-                case .failure(let title):
+                case .failure(let error):
                     self.indicator.flash(.error) {
-                        self.showErrorAlert(title: title)
+                        self.showErrorAlert(title: error.toAuthErrorMessage)
                     }
                 case .success:
                     self.indicator.flash(.success) {

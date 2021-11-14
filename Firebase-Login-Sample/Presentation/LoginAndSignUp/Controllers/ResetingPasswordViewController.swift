@@ -18,9 +18,7 @@ final class ResetingPasswordViewController: UIViewController {
     @IBOutlet private weak var stackViewTopConstraint: NSLayoutConstraint!
     
     private let userUseCase = UserUseCase(
-        repository: UserRepository(
-            dataStore: FirebaseUserDataStore()
-        )
+        repository: UserRepository()
     )
     private var isKeyboardHidden = true
     private let indicator = Indicator(kinds: PKHUDIndicator())
@@ -67,9 +65,9 @@ private extension ResetingPasswordViewController {
         userUseCase.sendPasswordResetMail(email: email) { [weak self] result in
             guard let self = self else { return }
             switch result {
-                case .failure(let title):
+                case .failure(let error):
                     self.indicator.flash(.error) {
-                        self.showErrorAlert(title: title)
+                        self.showErrorAlert(title: error.toAuthErrorMessage)
                     }
                 case .success:
                     self.indicator.flash(.success) {

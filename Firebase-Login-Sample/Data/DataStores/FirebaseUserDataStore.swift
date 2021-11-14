@@ -10,24 +10,19 @@ import FirebaseAuth
 import FirebaseFirestore
 import Firebase
 
-enum Result<Success, Failure> {
-    case success(Success)
-    case failure(Failure)
-}
-
-typealias ResultHandler<T> = (Result<T, String>) -> Void
+typealias ResultHandler<T> = (Result<T, Error>) -> Void
 
 protocol UserDataStoreProtocol {
-    var currentUser: User? { get }
+    var currentUser: FirebaseAuth.User? { get }
     func registerUser(email: String,
                       password: String,
-                      completion: @escaping ResultHandler<User>)
+                      completion: @escaping ResultHandler<FirebaseAuth.User>)
     func createUser(userId: String,
                     email: String,
                     completion: @escaping ResultHandler<Any?>)
     func login(email: String,
                password: String,
-               completion: @escaping (Result<Any?, Error>) -> Void)
+               completion: @escaping ResultHandler<Any?>)
     func logout(completion: @escaping ResultHandler<Any?>)
     func sendPasswordResetMail(email: String,
                                completion: @escaping ResultHandler<Any?>)
@@ -36,25 +31,23 @@ protocol UserDataStoreProtocol {
 
 final class FirebaseUserDataStore: UserDataStoreProtocol {
     
-    var currentUser: User? {
-        return User()
+    var currentUser: FirebaseAuth.User? {
+        return Auth.auth().currentUser
     }
     
     func registerUser(email: String,
                       password: String,
-                      completion: @escaping ResultHandler<User>) {
+                      completion: @escaping ResultHandler<FirebaseAuth.User>) {
         Auth.auth().createUser(withEmail: email,
                                password: password) { result, error in
             if let error = error {
-                let message = self.authErrorMessage(error)
-                completion(.failure(message))
+                completion(.failure(error))
                 return
             }
             if let user = result?.user {
-                let user = User(id: user.uid, isAnonymous: false)
                 completion(.success(user))
             } else if let error = error {
-                completion(.failure(error.localizedDescription))
+                completion(.failure(error))
             }
         }
     }
@@ -66,7 +59,7 @@ final class FirebaseUserDataStore: UserDataStoreProtocol {
         let data = [String: Any]()
         userRef.document(userId).setData(data) { error in
             if let error = error {
-                completion(.failure(error.localizedDescription))
+                completion(.failure(error))
                 return
             }
             completion(.success(nil))
@@ -75,7 +68,7 @@ final class FirebaseUserDataStore: UserDataStoreProtocol {
     
     func login(email: String,
                password: String,
-               completion: @escaping (Result<Any?, Error>) -> Void) {
+               completion: @escaping ResultHandler<Any?>) {
         Auth.auth().signIn(withEmail: email,
                            password: password) { _, error in
             if let error = error {
@@ -91,8 +84,7 @@ final class FirebaseUserDataStore: UserDataStoreProtocol {
             try Auth.auth().signOut()
             completion(.success(nil))
         } catch {
-            let message = authErrorMessage(error)
-            completion(.failure(message))
+            completion(.failure(error))
         }
     }
     
@@ -101,8 +93,7 @@ final class FirebaseUserDataStore: UserDataStoreProtocol {
         Auth.auth().languageCode = "ja_JP"
         Auth.auth().sendPasswordReset(withEmail: email) { error in
             if let error = error {
-                let message = self.authErrorMessage(error)
-                completion(.failure(message))
+                completion(.failure(error))
                 return
             }
             completion(.success(nil))
@@ -112,34 +103,11 @@ final class FirebaseUserDataStore: UserDataStoreProtocol {
     func signInAnonymously(completion: @escaping ResultHandler<Any?>) {
         Auth.auth().signInAnonymously { _, error in
             if let error = error {
-                let message = self.authErrorMessage(error)
-                completion(.failure(message))
+                completion(.failure(error))
                 return
             }
             completion(.success(nil))
         }
-    }
-    
-    private func authErrorMessage(_ error: Error) -> String {
-        if let errorCode = AuthErrorCode(rawValue: error._code) {
-            switch errorCode {
-                case .invalidEmail:
-                    return "メールアドレスの形式に誤りが含まれます。"
-                case .weakPassword:
-                    return "パスワードは６文字以上で入力してください。"
-                case .wrongPassword:
-                    return "パスワードに誤りがあります。"
-                case .userNotFound:
-                    return "こちらのメールアドレスは登録されていません。"
-                case .emailAlreadyInUse:
-                    return "こちらのメールアドレスは既に登録されています。"
-                case .adminRestrictedOperation:
-                    return "匿名ログインに失敗しました。"
-                default:
-                    break
-            }
-        }
-        return "不明なエラーが発生しました。"
     }
     
 }
@@ -170,14 +138,3 @@ extension Error {
     
 }
 
-private extension User {
-    
-    init?() {
-        guard let user = Auth.auth().currentUser else {
-            return nil
-        }
-        self.id = user.uid
-        self.isAnonymous = user.isAnonymous
-    }
-    
-}

@@ -37,9 +37,7 @@ final class LoginViewController: UIViewController {
         passwordForgotButton: passwordForgotButton.rx.tap.asSignal()
     )
     private let userUseCase = UserUseCase(
-        repository: UserRepository(
-            dataStore: FirebaseUserDataStore()
-        )
+        repository: UserRepository()
     )
     private let disposeBag = DisposeBag()
     

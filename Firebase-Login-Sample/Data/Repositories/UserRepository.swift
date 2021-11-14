@@ -7,24 +7,26 @@
 
 import Foundation
 import RxSwift
+import FirebaseAuth
 
 final class UserRepository: UserRepositoryProtocol {
     
-    private var dataStore: UserDataStoreProtocol
-    init(dataStore: UserDataStoreProtocol) {
-        self.dataStore = dataStore
-    }
+    private var dataStore = FirebaseUserDataStore()
     
     var currentUser: User? {
-        dataStore.currentUser
+        if let user = dataStore.currentUser {
+            return User(user: user)
+        }
+        return nil
     }
     
     func registerUser(email: String,
                       password: String,
                       completion: @escaping ResultHandler<User>) {
         dataStore.registerUser(email: email,
-                               password: password,
-                               completion: completion)
+                               password: password) {
+            completion($0.map { User(user: $0) })
+        }
     }
     
     func createUser(userId: String,
@@ -66,3 +68,11 @@ final class UserRepository: UserRepositoryProtocol {
     
 }
 
+private extension User {
+    
+    init(user: FirebaseAuth.User) {
+        self.id = user.uid
+        self.isAnonymous = user.isAnonymous
+    }
+    
+}

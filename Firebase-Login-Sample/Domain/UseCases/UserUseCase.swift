@@ -12,7 +12,6 @@ import RxRelay
 final class UserUseCase {
     
     private var repository: UserRepositoryProtocol
-    private let disposeBag = DisposeBag()
     
     init(repository: UserRepositoryProtocol) {
         self.repository = repository
