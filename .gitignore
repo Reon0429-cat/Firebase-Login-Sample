@@ -2,6 +2,10 @@
 
 ios/*
 
+# SwiftFormat
+BuildTools/.build
+BuildTools/.swiftpm
+
 build/
 *.pbxuser
 !default.pbxuser

@@ -438,6 +438,7 @@
 				ABBD78A32739FCC0007791EB /* Frameworks */,
 				ABBD78A42739FCC0007791EB /* Resources */,
 				6C45DD8C35893AEC9B62B085 /* [CP] Embed Pods Frameworks */,
+				AB1B1D432740EF20000F8220 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -623,6 +624,23 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Firebase-Login-Sample/Pods-Firebase-Login-Sample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		AB1B1D432740EF20000F8220 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${PODS_ROOT}/SwiftFormat/CommandLineTool/swiftformat\" \"$SRCROOT\"\n";
 		};
 		BCC6DC199F6C5D3A9F7331CC /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

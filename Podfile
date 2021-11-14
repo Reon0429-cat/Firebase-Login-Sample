@@ -13,6 +13,7 @@ target 'Firebase-Login-Sample' do
    pod 'ReachabilitySwift'
    pod 'RxSwift'
    pod 'RxCocoa'
+   pod 'SwiftFormat/CLI'
 
   target 'Firebase-Login-SampleTests' do
     inherit! :search_paths
