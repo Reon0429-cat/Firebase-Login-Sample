@@ -1,0 +1,8 @@
+# file options
+--exclude Pods
+
+# opt in rules
+--rules andOperator
+
+# enable rules
+--enable andOperator

@@ -11,6 +11,9 @@ target 'Firebase-Login-Sample' do
    pod 'Firebase/Firestore'
    pod 'PKHUD', '~> 5.0'
    pod 'ReachabilitySwift'
+   pod 'RxSwift'
+   pod 'RxCocoa'
+   pod 'SwiftFormat/CLI'
 
   target 'Firebase-Login-SampleTests' do
     inherit! :search_paths

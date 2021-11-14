@@ -29,24 +29,32 @@ final class LoginViewController: UIViewController {
     
     weak var delegate: LoginVCDelegate?
     private lazy var viewModel: LoginViewModelType = LoginViewModel(
-        userUseCase: userUseCase,
         mailText: mailAddressTextField.rx.text.orEmpty.asDriver(),
         passwordText: passwordTextField.rx.text.orEmpty.asDriver(),
         loginButton: loginButton.rx.tap.asSignal(),
         passwordSecureButton: passwordSecureButton.rx.tap.asSignal(),
         passwordForgotButton: passwordForgotButton.rx.tap.asSignal()
     )
-    private let userUseCase = UserUseCase(
-        repository: UserRepository(
-            dataStore: FirebaseUserDataStore()
-        )
-    )
+    
     private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupUI()
+        setupGR()
+        setupMailAddressTextField()
+        setupPasswordTextField()
+        setupLoginButton()
+        setupPasswordSecureButton()
+        setupMailAddressImage()
+        setupPasswordImage()
+        setupPasswordLabel()
+        setupMailAddressLabel()
+        setupPasswordForgotLabel()
+        setupPasswordForgotButton()
+        setupKeyboardObserver()
+        self.view.backgroundColor = .dynamicColor(light: .white,
+                                                  dark: .secondarySystemBackground)
         setupBindings()
         viewModel.inputs.viewDidLoad()
         
@@ -63,8 +71,7 @@ final class LoginViewController: UIViewController {
             .disposed(by: disposeBag)
         
         viewModel.outputs.event
-            .drive(onNext: { [weak self] event in
-                guard let self = self else { return }
+            .drive(onNext: { event in
                 switch event {
                     case .dismiss:
                         self.dismiss(animated: true)
@@ -94,18 +101,6 @@ final class LoginViewController: UIViewController {
         viewModel.outputs.isLoginButtonEnabled
             .drive(onNext: { self.loginButton.changeState(isEnabled: $0) })
             .disposed(by: disposeBag)
-        
-        NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
-            .subscribe(onNext: { [weak self] _ in
-                self?.viewModel.inputs.keyboardWillShow()
-            })
-            .disposed(by: disposeBag)
-        
-        NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
-            .subscribe(onNext: { [weak self] _ in
-                self?.viewModel.inputs.keyboardWillHide()
-            })
-            .disposed(by: disposeBag)
     }
     
 }
@@ -118,26 +113,17 @@ extension LoginViewController: UITextFieldDelegate {
         return true
     }
     
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        guard let mailAddressText = mailAddressTextField.text,
+              let passwordText = passwordTextField.text else { return }
+        let isEnabled = !mailAddressText.isEmpty && !passwordText.isEmpty
+        loginButton.changeState(isEnabled: isEnabled)
+    }
+    
 }
 
 // MARK: - setup
 private extension LoginViewController {
-    
-    func setupUI() {
-        setupGR()
-        setupMailAddressTextField()
-        setupPasswordTextField()
-        setupLoginButton()
-        setupPasswordSecureButton()
-        setupMailAddressImage()
-        setupPasswordImage()
-        setupPasswordLabel()
-        setupMailAddressLabel()
-        setupPasswordForgotLabel()
-        setupPasswordForgotButton()
-        self.view.backgroundColor = .dynamicColor(light: .white,
-                                                  dark: .secondarySystemBackground)
-    }
     
     func setupGR() {
         let leftSwipeGR = UISwipeGestureRecognizer(target: self,
@@ -196,6 +182,27 @@ private extension LoginViewController {
     func setupPasswordImage() {
         let lockImage = UIImage(systemName: .lock)
         passwordImage.image = lockImage.setColor(.dynamicColor(light: .black, dark: .white))
+    }
+    
+    func setupKeyboardObserver() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+    
+    @objc
+    func keyboardWillShow() {
+        viewModel.inputs.keyboardWillShow()
+    }
+    
+    @objc
+    func keyboardWillHide() {
+        viewModel.inputs.keyboardWillHide()
     }
     
 }
