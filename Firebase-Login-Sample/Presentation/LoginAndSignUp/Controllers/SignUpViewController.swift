@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 protocol SignUpVCDelegate: AnyObject {
     func rightSwipeDid()
@@ -30,34 +32,23 @@ final class SignUpViewController: UIViewController {
     @IBOutlet private weak var guestUserButton: CustomButton!
     
     weak var delegate: SignUpVCDelegate?
-    private var isPasswordHidden = true
-    private var isPasswordConfirmationHidden = true
-    private var isKeyboardHidden = true
-    private let userUseCase = UserUseCase(
-        repository: UserRepository()
+    private lazy var viewModel: SignUpViewModelType = SignUpViewModel(
+        userUseCase: UserUseCase(repository: UserRepository()),
+        signUpButton: signUpButton.rx.tap.asSignal(),
+        guestUserButton: guestUserButton.rx.tap.asSignal(),
+        passwordSecureButton: passwordSecureButton.rx.tap.asSignal(),
+        passwordConfirmationSecureButton: passwordConfirmationSecureButton.rx.tap.asSignal(),
+        mailAddressText: mailAddressTextField.rx.text.orEmpty.asDriver(),
+        passwordText: passwordTextField.rx.text.orEmpty.asDriver(),
+        passwordConfirmation: passwordConfirmationTextField.rx.text.orEmpty.asDriver()
     )
-    private let indicator = Indicator(kinds: PKHUDIndicator())
+    private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupGR()
-        setupMailAddressTextField()
-        setupPasswordTextField()
-        setupPasswordConfirmationTextField()
-        setupPasswordSecureButton()
-        setupPasswordConfirmationSecureButton()
-        setupSignUpButton()
-        setupMailAddressLabel()
-        setupMailAddressImage()
-        setupPasswordLabel()
-        setupPasswordImage()
-        setupPasswordConfirmationLabel()
-        setupPasswordConfirmationImage()
-        setupGuestUserButton()
-        setupKeyboardObserver()
-        self.view.backgroundColor = .dynamicColor(light: .white,
-                                                  dark: .secondarySystemBackground)
+        setupUI()
+        setupBindings()
         
     }
     
@@ -66,109 +57,62 @@ final class SignUpViewController: UIViewController {
         self.view.endEditing(true)
     }
     
-}
-
-// MARK: - IBAction func
-private extension SignUpViewController {
-    
-    @IBAction func passwordSecureButtonDidTapped(_ sender: Any) {
-        changePasswordSecureButtonImage(isSlash: isPasswordHidden)
-        passwordTextField.isSecureTextEntry.toggle()
-        isPasswordHidden.toggle()
-    }
-    
-    @IBAction func passwordConfirmationSecureButtonDidTapped(_ sender: Any) {
-        changePasswordConfirmationSecureButtonImage(isSlash: isPasswordConfirmationHidden)
-        passwordConfirmationTextField.isSecureTextEntry.toggle()
-        isPasswordConfirmationHidden.toggle()
-    }
-    
-    @IBAction func signUpButtonDidTapped(_ sender: Any) {
-        guard let email = mailAddressTextField.text,
-              let password = passwordTextField.text,
-              let passwordConfirmation = passwordConfirmationTextField.text else { return }
-        if CommunicationStatus().unstable() {
-            showErrorAlert(title: "通信環境が良くありません")
-            return
-        }
-        if password != passwordConfirmation {
-            showErrorAlert(title: "パスワードが一致しません")
-            return
-        }
-        indicator.show(.progress)
-        registerUser(email: email, password: password)
-    }
-    
-    @IBAction func guestUserButtonDidTapped(_ sender: Any) {
-        if CommunicationStatus().unstable() {
-            showErrorAlert(title: "通信環境が良くありません")
-            return
-        }
-        indicator.show(.progress)
-        userUseCase.signInAnonymously { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let error):
-                    self.indicator.flash(.error) {
-                        self.showErrorAlert(title: error.toAuthErrorMessage)
-                    }
-                case .success:
-                    self.indicator.flash(.success) {
+    private func setupBindings() {
+        // Input
+        NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
+            .subscribe(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.viewModel.inputs.keyboardWillShow(viewHeight: self.view.frame.height)
+            })
+            .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
+            .subscribe(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.viewModel.inputs.keyboardWillHide(viewHeight: self.view.frame.height)
+            })
+            .disposed(by: disposeBag)
+        
+        // Output
+        viewModel.outputs.event
+            .drive(onNext: { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                    case .showErrorAlert(let title):
+                        self.showErrorAlert(title: title)
+                    case .dismiss:
                         self.dismiss(animated: true)
-                    }
-            }
-        }
-    }
-    
-}
-
-// MARK: - func
-private extension SignUpViewController {
-    
-    func registerUser(email: String, password: String) {
-        userUseCase.registerUser(email: email,
-                                 password: password) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let error):
-                    self.indicator.flash(.error) {
-                        self.showErrorAlert(title: error.toAuthErrorMessage)
-                    }
-                case .success(let user):
-                    self.createUser(userId: user.id, mailAddressText: email)
-            }
-        }
-    }
-    
-    func createUser(userId: String, mailAddressText: String) {
-        userUseCase.createUser(userId: userId,
-                               email: mailAddressText) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let error):
-                    self.indicator.flash(.error) {
-                        self.showErrorAlert(title: error.toAuthErrorMessage)
-                    }
-                case .success:
-                    self.indicator.flash(.success) {
-                        self.dismiss(animated: true)
-                    }
-            }
-        }
-    }
-    
-    func changePasswordSecureButtonImage(isSlash: Bool) {
-        let eyeFillImage = UIImage(systemName: .eyeFill)
-        let eyeSlashFillImage = UIImage(systemName: .eyeSlashFill)
-        let image = isSlash ? eyeSlashFillImage : eyeFillImage
-        passwordSecureButton.setImage(image, for: .normal)
-    }
-    
-    func changePasswordConfirmationSecureButtonImage(isSlash: Bool) {
-        let eyeFillImage = UIImage(systemName: .eyeFill)
-        let eyeSlashFillImage = UIImage(systemName: .eyeSlashFill)
-        let image = isSlash ? eyeSlashFillImage : eyeFillImage
-        passwordConfirmationSecureButton.setImage(image, for: .normal)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.outputs.shouldPasswordTextSecured
+            .drive(onNext: { [weak self] element in
+                guard let self = self else { return }
+                self.passwordTextField.isSecureTextEntry = element.isSecured
+                self.passwordSecureButton.setImage(element.image, for: .normal)
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.outputs.shouldPasswordConfirmationTextSecured
+            .drive(onNext: { [weak self] element in
+                guard let self = self else { return }
+                self.passwordConfirmationTextField.isSecureTextEntry = element.isSecured
+                self.passwordConfirmationSecureButton.setImage(element.image, for: .normal)
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.outputs.animateOfStackView
+            .drive(onNext: { [weak self] (spacing, constant) in
+                guard let self = self else { return }
+                UIView.animate(deadlineFromNow: 0, duration: 0.5) {
+                    self.stackView.spacing += spacing
+                    self.signUpButtonTopConstraint.constant += constant
+                    self.view.layoutIfNeeded()
+                }
+            })
+            .disposed(by: disposeBag)
+        
     }
     
 }
@@ -194,6 +138,25 @@ extension SignUpViewController: UITextFieldDelegate {
 // MARK: - setup
 private extension SignUpViewController {
     
+    func setupUI() {
+        setupGR()
+        setupMailAddressTextField()
+        setupPasswordTextField()
+        setupPasswordConfirmationTextField()
+        setupPasswordSecureButton()
+        setupPasswordConfirmationSecureButton()
+        setupSignUpButton()
+        setupMailAddressLabel()
+        setupMailAddressImage()
+        setupPasswordLabel()
+        setupPasswordImage()
+        setupPasswordConfirmationLabel()
+        setupPasswordConfirmationImage()
+        setupGuestUserButton()
+        self.view.backgroundColor = .dynamicColor(light: .white,
+                                                  dark: .secondarySystemBackground)
+    }
+    
     func setupGR() {
         let rightSwipeGR = UISwipeGestureRecognizer(target: self,
                                                     action: #selector(rightSwipeDid))
@@ -213,23 +176,19 @@ private extension SignUpViewController {
     
     func setupPasswordTextField() {
         passwordTextField.delegate = self
-        passwordTextField.isSecureTextEntry = true
         passwordTextField.textContentType = .newPassword
     }
     
     func setupPasswordConfirmationTextField() {
         passwordConfirmationTextField.delegate = self
-        passwordConfirmationTextField.isSecureTextEntry = true
         passwordTextField.textContentType = .newPassword
     }
     
     func setupPasswordSecureButton() {
-        changePasswordSecureButtonImage(isSlash: false)
         passwordSecureButton.tintColor = .dynamicColor(light: .black, dark: .white)
     }
     
     func setupPasswordConfirmationSecureButton() {
-        changePasswordConfirmationSecureButtonImage(isSlash: false)
         passwordConfirmationSecureButton.tintColor = .dynamicColor(light: .black, dark: .white)
     }
     
@@ -274,51 +233,6 @@ private extension SignUpViewController {
         guestUserButton.titleLabel?.adjustsFontSizeToFitWidth = true
         guestUserButton.titleLabel?.minimumScaleFactor = 0.8
         guestUserButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-    }
-    
-    func setupKeyboardObserver() {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(keyboardWillShow),
-                                               name: UIResponder.keyboardWillShowNotification,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(keyboardWillHide),
-                                               name: UIResponder.keyboardWillHideNotification,
-                                               object: nil)
-    }
-    
-    @objc
-    func keyboardWillShow() {
-        if isKeyboardHidden {
-            UIView.animate(deadlineFromNow: 0, duration: 0.5) {
-                if self.view.frame.height < 600 {
-                    self.stackView.spacing -= 25
-                    self.signUpButtonTopConstraint.constant -= 40
-                } else {
-                    self.stackView.spacing -= 15
-                    self.signUpButtonTopConstraint.constant -= 20
-                }
-                self.view.layoutIfNeeded()
-            }
-        }
-        isKeyboardHidden = false
-    }
-    
-    @objc
-    func keyboardWillHide() {
-        if !isKeyboardHidden {
-            UIView.animate(deadlineFromNow: 0, duration: 0.5) {
-                if self.view.frame.height < 600 {
-                    self.stackView.spacing += 25
-                    self.signUpButtonTopConstraint.constant += 40
-                } else {
-                    self.stackView.spacing += 15
-                    self.signUpButtonTopConstraint.constant += 20
-                }
-                self.view.layoutIfNeeded()
-            }
-        }
-        isKeyboardHidden = true
     }
     
 }
