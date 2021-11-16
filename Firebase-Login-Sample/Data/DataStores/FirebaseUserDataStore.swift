@@ -12,24 +12,7 @@ import Firebase
 
 typealias ResultHandler<T> = (Result<T, Error>) -> Void
 
-protocol UserDataStoreProtocol {
-    var currentUser: FirebaseAuth.User? { get }
-    func registerUser(email: String,
-                      password: String,
-                      completion: @escaping ResultHandler<FirebaseAuth.User>)
-    func createUser(userId: String,
-                    email: String,
-                    completion: @escaping ResultHandler<Any?>)
-    func login(email: String,
-               password: String,
-               completion: @escaping ResultHandler<Any?>)
-    func logout(completion: @escaping ResultHandler<Any?>)
-    func sendPasswordResetMail(email: String,
-                               completion: @escaping ResultHandler<Any?>)
-    func signInAnonymously(completion: @escaping ResultHandler<Any?>)
-}
-
-final class FirebaseUserDataStore: UserDataStoreProtocol {
+final class FirebaseUserDataStore {
     
     var currentUser: FirebaseAuth.User? {
         return Auth.auth().currentUser
