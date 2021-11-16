@@ -20,21 +20,46 @@ final class UserRepository: UserRepositoryProtocol {
         return nil
     }
     
-    func registerUser(email: String,
-                      password: String,
-                      completion: @escaping ResultHandler<User>) {
-        dataStore.registerUser(email: email,
-                               password: password) {
-            completion($0.map { User(user: $0) })
+    func registerUser(email: String, password: String) -> Single<User> {
+        Single<User>.create { observer in
+            self.dataStore.registerUser(email: email, password: password) { result in
+                switch result {
+                    case .failure(let error):
+                        observer(.failure(error))
+                    case .success(let user):
+                        observer(.success(User(user: user)))
+                }
+            }
+            return Disposables.create()
         }
     }
     
-    func createUser(userId: String,
-                    email: String,
-                    completion: @escaping ResultHandler<Any?>) {
-        dataStore.createUser(userId: userId,
-                             email: email,
-                             completion: completion)
+    func createUser(userId: String, email: String) -> Completable {
+        Completable.create { observer in
+            self.dataStore.createUser(userId: userId, email: email) { result in
+                switch result {
+                    case .failure(let error):
+                        observer(.error(error))
+                    case .success:
+                        observer(.completed)
+                }
+            }
+            return Disposables.create()
+        }
+    }
+    
+    func signInAnonymously() -> Completable {
+        Completable.create { observer in
+            self.dataStore.signInAnonymously { result in
+                switch result {
+                    case .failure(let error):
+                        observer(.error(error))
+                    case .success:
+                        observer(.completed)
+                }
+            }
+            return Disposables.create()
+        }
     }
     
     func login(email: String, password: String) -> Completable {
@@ -60,10 +85,6 @@ final class UserRepository: UserRepositoryProtocol {
                                completion: @escaping ResultHandler<Any?>) {
         dataStore.sendPasswordResetMail(email: email,
                                         completion: completion)
-    }
-    
-    func signInAnonymously(completion: @escaping ResultHandler<Any?>) {
-        dataStore.signInAnonymously(completion: completion)
     }
     
 }

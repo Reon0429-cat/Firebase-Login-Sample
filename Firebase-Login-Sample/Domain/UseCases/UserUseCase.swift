@@ -28,20 +28,12 @@ final class UserUseCase {
         return false
     }
     
-    func registerUser(email: String,
-                      password: String,
-                      completion: @escaping ResultHandler<User>) {
-        repository.registerUser(email: email,
-                                password: password,
-                                completion: completion)
+    func registerUser(email: String, password: String) -> Single<User> {
+        repository.registerUser(email: email, password: password)
     }
     
-    func createUser(userId: String,
-                    email: String,
-                    completion: @escaping ResultHandler<Any?>) {
-        repository.createUser(userId: userId,
-                              email: email,
-                              completion: completion)
+    func createUser(userId: String, email: String) -> Completable {
+        repository.createUser(userId: userId, email: email)
     }
     
     func login(email: String, password: String) -> Completable {
@@ -58,8 +50,8 @@ final class UserUseCase {
                                          completion: completion)
     }
     
-    func signInAnonymously(completion: @escaping ResultHandler<Any?>) {
-        repository.signInAnonymously(completion: completion)
+    func signInAnonymously() -> Completable {
+        repository.signInAnonymously()
     }
     
 }

@@ -137,55 +137,61 @@ final class SignUpViewModel {
     private func registerUser(userUseCase: UserUseCase,
                               mailAddressText: String,
                               passwordText: String) {
-        userUseCase.registerUser(email: mailAddressText,
-                                 password: passwordText) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let error):
-                    self.indicator.flash(.error) {
-                        self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
-                    }
-                case .success(let user):
+        userUseCase.registerUser(email: mailAddressText, password: passwordText)
+            .subscribe(
+                onSuccess: { [weak self] user in
+                    guard let self = self else { return }
                     self.createUser(userUseCase: userUseCase,
                                     user: user,
                                     mailAddressText: mailAddressText)
-            }
-        }
+                },
+                onFailure: { [weak self] error in
+                    guard let self = self else { return }
+                    self.indicator.flash(.error) {
+                        self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
+                    }
+                }
+            )
+            .disposed(by: disposeBag)
     }
     
     private func createUser(userUseCase: UserUseCase,
                             user: User,
                             mailAddressText: String) {
-        userUseCase.createUser(userId: user.id,
-                               email: mailAddressText) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let error):
-                    self.indicator.flash(.error) {
-                        self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
-                    }
-                case .success:
+        userUseCase.createUser(userId: user.id, email: mailAddressText)
+            .subscribe(
+                onCompleted: { [weak self] in
+                    guard let self = self else { return }
                     self.indicator.flash(.success) {
                         self.eventRelay.accept(.dismiss)
                     }
-            }
-        }
+                },
+                onError: { [weak self] error in
+                    guard let self = self else { return }
+                    self.indicator.flash(.error) {
+                        self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
+                    }
+                }
+            )
+            .disposed(by: disposeBag)
     }
     
     private func signInAnonymously(userUseCase: UserUseCase) {
-        userUseCase.signInAnonymously { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let error):
-                    self.indicator.flash(.error) {
-                        self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
-                    }
-                case .success:
+        userUseCase.signInAnonymously()
+            .subscribe(
+                onCompleted: { [weak self] in
+                    guard let self = self else { return }
                     self.indicator.flash(.success) {
                         self.eventRelay.accept(.dismiss)
                     }
-            }
-        }
+                },
+                onError: { [weak self] error in
+                    guard let self = self else { return }
+                    self.indicator.flash(.error) {
+                        self.eventRelay.accept(.showErrorAlert(title: error.toAuthErrorMessage))
+                    }
+                })
+            .disposed(by: disposeBag)
     }
     
     private func getPasswordSecureButtonImage(isSlash: Bool) -> UIImage {
