@@ -29,15 +29,12 @@ final class LoginViewController: UIViewController {
     
     weak var delegate: LoginVCDelegate?
     private lazy var viewModel: LoginViewModelType = LoginViewModel(
-        userUseCase: userUseCase,
+        userUseCase: UserUseCase(repository: UserRepository()),
         mailText: mailAddressTextField.rx.text.orEmpty.asDriver(),
         passwordText: passwordTextField.rx.text.orEmpty.asDriver(),
         loginButton: loginButton.rx.tap.asSignal(),
         passwordSecureButton: passwordSecureButton.rx.tap.asSignal(),
         passwordForgotButton: passwordForgotButton.rx.tap.asSignal()
-    )
-    private let userUseCase = UserUseCase(
-        repository: UserRepository()
     )
     private let disposeBag = DisposeBag()
     
@@ -57,7 +54,10 @@ final class LoginViewController: UIViewController {
     
     private func setupBindings() {
         viewModel.outputs.passwordSecureButtonImage
-            .drive(onNext: { self.passwordSecureButton.setImage($0, for: .normal) })
+            .drive(onNext: { [weak self] in
+                guard let self = self else { return }
+                self.passwordSecureButton.setImage($0, for: .normal)
+            })
             .disposed(by: disposeBag)
         
         viewModel.outputs.event
@@ -81,7 +81,8 @@ final class LoginViewController: UIViewController {
             .disposed(by: disposeBag)
         
         viewModel.outputs.stackViewTopConstant
-            .drive(onNext: { constant in
+            .drive(onNext: { [weak self] constant in
+                guard let self = self else { return }
                 UIView.animate(deadlineFromNow: 0, duration: 0.5) {
                     self.stackViewTopConstraint.constant += constant
                     self.view.layoutIfNeeded()
@@ -90,18 +91,23 @@ final class LoginViewController: UIViewController {
             .disposed(by: disposeBag)
         
         viewModel.outputs.isLoginButtonEnabled
-            .drive(onNext: { self.loginButton.changeState(isEnabled: $0) })
+            .drive(onNext: { [weak self] in
+                guard let self = self else { return }
+                self.loginButton.changeState(isEnabled: $0)
+            })
             .disposed(by: disposeBag)
         
         NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
             .subscribe(onNext: { [weak self] _ in
-                self?.viewModel.inputs.keyboardWillShow()
+                guard let self = self else { return }
+                self.viewModel.inputs.keyboardWillShow()
             })
             .disposed(by: disposeBag)
         
         NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
             .subscribe(onNext: { [weak self] _ in
-                self?.viewModel.inputs.keyboardWillHide()
+                guard let self = self else { return }
+                self.viewModel.inputs.keyboardWillHide()
             })
             .disposed(by: disposeBag)
     }
