@@ -28,9 +28,9 @@ final class ResetingPasswordViewModel {
          mailText: Driver<String>) {
         
         // Input
-        sendButton.asObservable()
-            .withLatestFrom(mailText.asObservable())
-            .subscribe(onNext: { [weak self] mailText in
+        sendButton
+            .withLatestFrom(mailText.asSignal(onErrorJustReturn: ""))
+            .emit(onNext: { [weak self] mailText in
                 guard let self = self else { return }
                 self.indicator.show(.progress)
                 userUseCase.sendPasswordResetMail(email: mailText)
