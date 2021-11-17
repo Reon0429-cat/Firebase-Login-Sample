@@ -14,7 +14,6 @@ protocol UserRepositoryProtocol {
     func createUser(userId: String, email: String) -> Completable
     func login(email: String, password: String) -> Completable
     func logout(completion: @escaping ResultHandler<Any?>)
-    func sendPasswordResetMail(email: String,
-                               completion: @escaping ResultHandler<Any?>)
+    func sendPasswordResetMail(email: String) -> Completable
     func signInAnonymously() -> Completable
 }

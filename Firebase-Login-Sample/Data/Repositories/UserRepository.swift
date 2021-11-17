@@ -81,10 +81,18 @@ final class UserRepository: UserRepositoryProtocol {
         dataStore.logout(completion: completion)
     }
     
-    func sendPasswordResetMail(email: String,
-                               completion: @escaping ResultHandler<Any?>) {
-        dataStore.sendPasswordResetMail(email: email,
-                                        completion: completion)
+    func sendPasswordResetMail(email: String) -> Completable {
+        Completable.create { observer in
+            self.dataStore.sendPasswordResetMail(email: email) { result in
+                switch result {
+                    case .failure(let error):
+                        observer(.error(error))
+                    case .success:
+                        observer(.completed)
+                }
+            }
+            return Disposables.create()
+        }
     }
     
 }

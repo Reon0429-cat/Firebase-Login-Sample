@@ -44,10 +44,8 @@ final class UserUseCase {
         repository.logout(completion: completion)
     }
     
-    func sendPasswordResetMail(email: String,
-                               completion: @escaping ResultHandler<Any?>) {
-        repository.sendPasswordResetMail(email: email,
-                                         completion: completion)
+    func sendPasswordResetMail(email: String) -> Completable {
+        repository.sendPasswordResetMail(email: email)
     }
     
     func signInAnonymously() -> Completable {

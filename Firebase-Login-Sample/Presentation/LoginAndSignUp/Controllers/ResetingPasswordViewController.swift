@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 final class ResetingPasswordViewController: UIViewController {
     
@@ -13,31 +15,23 @@ final class ResetingPasswordViewController: UIViewController {
     @IBOutlet private weak var mailAddressImage: UIImageView!
     @IBOutlet private weak var mailAddressLabel: UILabel!
     @IBOutlet private weak var mailAddressTextField: CustomTextField!
-    @IBOutlet private weak var sendButton: CustomButton!
     @IBOutlet private weak var detailLabel: UILabel!
     @IBOutlet private weak var stackViewTopConstraint: NSLayoutConstraint!
+    @IBOutlet private weak var sendButton: CustomButton!
     
-    private let userUseCase = UserUseCase(
-        repository: UserRepository()
+    private lazy var viewModel = ResetingPasswordViewModel(
+        userUseCase: UserUseCase(repository: UserRepository()),
+        sendButton: sendButton.rx.tap.asSignal(),
+        mailText: mailAddressTextField.rx.text.orEmpty.asDriver()
     )
-    private var isKeyboardHidden = true
-    private let indicator = Indicator(kinds: PKHUDIndicator())
+    private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupTitleLabel()
-        setupMailAddressLabel()
-        setupMailAddressImage()
-        setupDetailLabel()
-        setupMailAddressTextField()
-        setupKeyboardObserver()
-        setupSendButton()
+        setupUI()
+        setupBindings()
         
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>,
@@ -45,36 +39,53 @@ final class ResetingPasswordViewController: UIViewController {
         self.view.endEditing(true)
     }
     
-}
-
-// MARK: - IBAction func
-private extension ResetingPasswordViewController {
-    
-    @IBAction func sendButtonDidTapped(_ sender: Any) {
-        guard let email = mailAddressTextField.text else { return }
-        indicator.show(.progress)
-        sendPasswordResetMail(email: email)
-    }
-    
-}
-
-// MARK: - func
-private extension ResetingPasswordViewController {
-    
-    func sendPasswordResetMail(email: String) {
-        userUseCase.sendPasswordResetMail(email: email) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .failure(let error):
-                    self.indicator.flash(.error) {
-                        self.showErrorAlert(title: error.toAuthErrorMessage)
-                    }
-                case .success:
-                    self.indicator.flash(.success) {
-                        self.dismiss(animated: true)
-                    }
-            }
+    private func setupBindings() {
+        // Input
+        if self.view.frame.height < 800 {
+            NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
+                .subscribe(onNext: { [weak self] _ in
+                    guard let self = self else { return }
+                    self.viewModel.willShowedKeyboard()
+                })
+                .disposed(by: disposeBag)
+            
+            NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
+                .subscribe(onNext: { [weak self] _ in
+                    guard let self = self else { return }
+                    self.viewModel.willHiddenKeyboard()
+                })
+                .disposed(by: disposeBag)
         }
+        
+        // Output
+        viewModel.event
+            .drive(onNext: { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                    case .dismiss:
+                        self.dismiss(animated: true)
+                    case .presentErrorAlert(let title):
+                        self.showErrorAlert(title: title)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.isEnabledSendButton
+            .drive(onNext: { [weak self] isEnabled in
+                guard let self = self else { return }
+                self.sendButton.changeState(isEnabled: isEnabled)
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.stackViewTopConstant
+            .drive(onNext: { [weak self] constant in
+                guard let self = self else { return }
+                UIView.animate(deadlineFromNow: 0, duration: 0.5) {
+                    self.stackViewTopConstraint.constant += constant
+                    self.view.layoutIfNeeded()
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
 }
@@ -87,19 +98,21 @@ extension ResetingPasswordViewController: UITextFieldDelegate {
         return true
     }
     
-    func textFieldDidChangeSelection(_ textField: UITextField) {
-        guard let emailText = mailAddressTextField.text else { return }
-        let isEnabled = !emailText.isEmpty
-        sendButton.changeState(isEnabled: isEnabled)
-    }
-    
 }
 
 // MARK: - setup
 private extension ResetingPasswordViewController {
     
+    func setupUI() {
+        setupTitleLabel()
+        setupMailAddressLabel()
+        setupMailAddressImage()
+        setupDetailLabel()
+        setupMailAddressTextField()
+        setupSendButton()
+    }
+    
     func setupSendButton() {
-        sendButton.changeState(isEnabled: false)
         sendButton.setTitle("送信", for: .normal)
     }
     
@@ -123,41 +136,6 @@ private extension ResetingPasswordViewController {
     
     func setupDetailLabel() {
         detailLabel.text = "上記のメールアドレスにパスワード\n再設定用のURLを送信します。"
-    }
-    
-    func setupKeyboardObserver() {
-        if self.view.frame.height < 800 {
-            NotificationCenter.default.addObserver(self,
-                                                   selector: #selector(keyboardWillShow),
-                                                   name: UIResponder.keyboardWillShowNotification,
-                                                   object: nil)
-            NotificationCenter.default.addObserver(self,
-                                                   selector: #selector(keyboardWillHide),
-                                                   name: UIResponder.keyboardWillHideNotification,
-                                                   object: nil)
-        }
-    }
-    
-    @objc
-    func keyboardWillShow() {
-        if isKeyboardHidden {
-            UIView.animate(deadlineFromNow: 0, duration: 0.5) {
-                self.stackViewTopConstraint.constant -= 30
-                self.view.layoutIfNeeded()
-            }
-        }
-        isKeyboardHidden = false
-    }
-    
-    @objc
-    func keyboardWillHide() {
-        if !isKeyboardHidden {
-            UIView.animate(deadlineFromNow: 0, duration: 0.5) {
-                self.stackViewTopConstraint.constant += 30
-                self.view.layoutIfNeeded()
-            }
-        }
-        isKeyboardHidden = true
     }
     
 }
