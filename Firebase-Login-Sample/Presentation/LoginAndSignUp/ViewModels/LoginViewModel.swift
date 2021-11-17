@@ -63,14 +63,14 @@ final class LoginViewModel {
             .bind(to: isLoginButtonEnabledRelay)
             .disposed(by: disposeBag)
         
-        loginButton.asObservable()
+        loginButton
             .withLatestFrom(
-                Observable.combineLatest(
-                    mailText.asObservable(),
-                    passwordText.asObservable()
+                Signal.combineLatest(
+                    mailText.asSignal(onErrorJustReturn: ""),
+                    passwordText.asSignal(onErrorJustReturn: "")
                 )
             )
-            .subscribe(onNext: { [weak self] in
+            .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 self.indicator.show(.progress)
                 userUseCase.login(email: $0, password: $1)
@@ -88,8 +88,8 @@ final class LoginViewModel {
             })
             .disposed(by: disposeBag)
         
-        passwordSecureButton.asObservable()
-            .subscribe(onNext: { [weak self] in
+        passwordSecureButton
+            .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 self.isEyeFillImageRelay.accept(self.isPasswordHidden)
                 self.shouldPasswordTextFieldSecureRelay.accept(!self.shouldPasswordTextFieldSecureRelay.value)
@@ -97,8 +97,8 @@ final class LoginViewModel {
             })
             .disposed(by: disposeBag)
         
-        passwordForgotButton.asObservable()
-            .subscribe(onNext: { [weak self] in
+        passwordForgotButton
+            .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 self.eventRelay.accept(.presentResetingPassword)
             })

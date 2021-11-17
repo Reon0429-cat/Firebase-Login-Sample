@@ -67,15 +67,15 @@ final class SignUpViewModel {
          passwordText: Driver<String>,
          passwordConfirmation: Driver<String>) {
         
-        signUpButton.asObservable()
+        signUpButton
             .withLatestFrom(
-                Observable.combineLatest(
-                    mailAddressText.asObservable(),
-                    passwordText.asObservable(),
-                    passwordConfirmation.asObservable()
+                Signal.combineLatest(
+                    mailAddressText.asSignal(onErrorJustReturn: ""),
+                    passwordText.asSignal(onErrorJustReturn: ""),
+                    passwordConfirmation.asSignal(onErrorJustReturn: "")
                 )
             )
-            .subscribe(onNext: { [weak self] mailAddressText, passwordText, passwordConfirmationText in
+            .emit(onNext: { [weak self] mailAddressText, passwordText, passwordConfirmationText in
                 guard let self = self else { return }
                 if CommunicationStatus().unstable() {
                     self.eventRelay.accept(.showErrorAlert(title: "通信環境が良くありません"))
@@ -92,8 +92,8 @@ final class SignUpViewModel {
             })
             .disposed(by: disposeBag)
         
-        guestUserButton.asObservable()
-            .subscribe(onNext: { [weak self] in
+        guestUserButton
+            .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 if CommunicationStatus().unstable() {
                     self.eventRelay.accept(.showErrorAlert(title: "通信環境が良くありません"))
@@ -104,8 +104,8 @@ final class SignUpViewModel {
             })
             .disposed(by: disposeBag)
         
-        passwordSecureButton.asObservable()
-            .subscribe(onNext: { [weak self] in
+        passwordSecureButton
+            .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 let image = self.getPasswordSecureButtonImage(isSlash: self.isPasswordHidden)
                 self.shouldPasswordTextSecuredRelay.accept(
@@ -118,8 +118,8 @@ final class SignUpViewModel {
             })
             .disposed(by: disposeBag)
         
-        passwordConfirmationSecureButton.asObservable()
-            .subscribe(onNext: { [weak self] in
+        passwordConfirmationSecureButton
+            .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 let image = self.getPasswordSecureButtonImage(isSlash: self.isPasswordConfirmationHidden)
                 self.shouldPasswordConfirmationTextSecuredRelay.accept(
