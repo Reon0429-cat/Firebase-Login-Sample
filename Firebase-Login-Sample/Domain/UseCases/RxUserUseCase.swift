@@ -9,7 +9,7 @@ import UIKit
 import RxSwift
 import RxRelay
 
-final class UserUseCase {
+final class RxUserUseCase {
     
     private var repository: UserRepositoryProtocol
     
