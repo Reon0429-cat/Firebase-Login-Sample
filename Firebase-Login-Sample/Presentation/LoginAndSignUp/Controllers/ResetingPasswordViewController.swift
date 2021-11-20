@@ -20,7 +20,7 @@ final class ResetingPasswordViewController: UIViewController {
     @IBOutlet private weak var sendButton: CustomButton!
     
     private lazy var viewModel = ResetingPasswordViewModel(
-        userUseCase: UserUseCase(repository: UserRepository()),
+        userUseCase: RxUserUseCase(repository: RxUserRepository()),
         sendButton: sendButton.rx.tap.asSignal(),
         mailText: mailAddressTextField.rx.text.orEmpty.asDriver()
     )

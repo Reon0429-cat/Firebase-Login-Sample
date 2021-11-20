@@ -24,7 +24,7 @@
 		ABBD78EB273A00FC007791EB /* FirebaseUserDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78EA273A00FC007791EB /* FirebaseUserDataStore.swift */; };
 		ABBD78ED273A010A007791EB /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78EC273A010A007791EB /* User.swift */; };
 		ABBD78EF273A012A007791EB /* UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78EE273A012A007791EB /* UserRepository.swift */; };
-		ABBD78F1273A0135007791EB /* UserUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78F0273A0135007791EB /* UserUseCase.swift */; };
+		ABBD78F1273A0135007791EB /* RxUserUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78F0273A0135007791EB /* RxUserUseCase.swift */; };
 		ABBD78FE273A015A007791EB /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78F4273A015A007791EB /* SignUpViewController.swift */; };
 		ABBD78FF273A015B007791EB /* ResetingPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78F5273A015A007791EB /* ResetingPasswordViewController.swift */; };
 		ABBD7900273A015B007791EB /* LoginAndSignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBD78F6273A015A007791EB /* LoginAndSignUpViewController.swift */; };
@@ -93,7 +93,7 @@
 		ABBD78EA273A00FC007791EB /* FirebaseUserDataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseUserDataStore.swift; sourceTree = "<group>"; };
 		ABBD78EC273A010A007791EB /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		ABBD78EE273A012A007791EB /* UserRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
-		ABBD78F0273A0135007791EB /* UserUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserUseCase.swift; sourceTree = "<group>"; };
+		ABBD78F0273A0135007791EB /* RxUserUseCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RxUserUseCase.swift; sourceTree = "<group>"; };
 		ABBD78F4273A015A007791EB /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		ABBD78F5273A015A007791EB /* ResetingPasswordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResetingPasswordViewController.swift; sourceTree = "<group>"; };
 		ABBD78F6273A015A007791EB /* LoginAndSignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginAndSignUpViewController.swift; sourceTree = "<group>"; };
@@ -311,7 +311,7 @@
 		ABBD78E32739FF9F007791EB /* UseCases */ = {
 			isa = PBXGroup;
 			children = (
-				ABBD78F0273A0135007791EB /* UserUseCase.swift */,
+				ABBD78F0273A0135007791EB /* RxUserUseCase.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -709,7 +709,7 @@
 				ABBD78FF273A015B007791EB /* ResetingPasswordViewController.swift in Sources */,
 				ABBD78AA2739FCC0007791EB /* AppDelegate.swift in Sources */,
 				ABBD7961273A04A9007791EB /* HUDIndicator.swift in Sources */,
-				ABBD78F1273A0135007791EB /* UserUseCase.swift in Sources */,
+				ABBD78F1273A0135007791EB /* RxUserUseCase.swift in Sources */,
 				ABBD796D273A080B007791EB /* CommunicationStatus.swift in Sources */,
 				AB1B1D8327452793000F8220 /* ResetingPasswordViewModel.swift in Sources */,
 				ABBD7971273A08FF007791EB /* UIImage+Extension.swift in Sources */,
